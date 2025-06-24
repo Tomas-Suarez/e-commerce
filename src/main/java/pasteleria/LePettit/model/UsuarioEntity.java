@@ -39,6 +39,6 @@ public class UsuarioEntity {
     private RolEntity rol;
 
     @OneToOne
-    @JoinColumn(name = "id_cliente", nullable = false)
+    @JoinColumn(name = "id_cliente", nullable = true)
     private ClienteEntity cliente;
 }

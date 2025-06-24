@@ -1,32 +1,28 @@
 package pasteleria.LePettit.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "carrito")
-public class CarritoEntity {
+@Table(name = "metodo_pago")
+public class MetodoPagoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    private LocalDate fecha;
+    @NotBlank
+    @Size(max = 30)
+    private String nombre;
 
-    private boolean activo;
 
-    @OneToOne
-    @JoinColumn(name = "id_cliente", nullable = false)
-    private ClienteEntity cliente;
 }

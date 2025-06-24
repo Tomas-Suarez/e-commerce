@@ -7,26 +7,31 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "carrito")
-public class CarritoEntity {
+@Table(name = "pago")
+public class PagoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
-    private LocalDate fecha;
+    private BigDecimal monto;
 
     private boolean activo;
 
-    @OneToOne
-    @JoinColumn(name = "id_cliente", nullable = false)
-    private ClienteEntity cliente;
+    @NotNull
+    private LocalDateTime fecha_pago;
+
+    @ManyToOne
+    @JoinColumn(name = "id_metodo_pago", nullable = false)
+    private MetodoPagoEntity metodoPago;
+
 }
