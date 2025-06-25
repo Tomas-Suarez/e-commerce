@@ -31,6 +31,10 @@ public class PagoEntity {
     private LocalDateTime fecha_pago;
 
     @ManyToOne
+    @JoinColumn(name = "id_pedido", nullable = false)
+    private PedidoEntity pedido;
+
+    @ManyToOne
     @JoinColumn(name = "id_metodo_pago", nullable = false)
     private MetodoPagoEntity metodoPago;
 

@@ -38,5 +38,5 @@ public class EnvioEntity {
 
     @ManyToOne
     @JoinColumn(name = "id_estado_envio", nullable = false)
-    private EstadoPedidoEntity estadoPedido;
+    private EstadoEnvioEntity estadoEnvio;
 }

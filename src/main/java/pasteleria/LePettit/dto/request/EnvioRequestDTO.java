@@ -22,5 +22,5 @@ public class EnvioRequestDTO {
     private Long PedidoId;
 
     @NotNull
-    private Long EstadoPedidoId;
+    private Long EstadoEnvioId;
 }

@@ -1,6 +1,5 @@
 package pasteleria.LePettit.dto.response;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -12,6 +11,6 @@ public class PedidoResponseDTO {
     private LocalDateTime fecha;
     private BigDecimal total;
 
-    private PedidoResponseDTO pedido;
+    private ClienteResponseDTO cliente;
     private String estadoPedido;
 }
