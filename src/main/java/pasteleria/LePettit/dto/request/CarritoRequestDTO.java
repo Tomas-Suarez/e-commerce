@@ -1,19 +1,16 @@
 package pasteleria.LePettit.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
 import java.time.LocalDate;
 
-@Data
-public class CarritoRequestDTO {
+public record CarritoRequestDTO(
+        @NotNull
+        LocalDate fecha,
 
-    @NotNull
-    private LocalDate fecha;
+        boolean activo,
 
-    private boolean activo;
-
-    @NotNull
-    private Long clienteId;
-
+        @NotNull
+        Long clienteId
+) {
 }

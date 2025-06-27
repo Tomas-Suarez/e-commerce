@@ -1,43 +1,40 @@
 package pasteleria.LePettit.dto.request;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data
-public class FacturaRequestDTO {
+public record FacturaRequestDTO(
+        @NotBlank
+        String numero,
 
-    @NotBlank
-    private String numero;
+        @NotNull
+        LocalDate fechaEmision,
 
-    @NotNull
-    private LocalDate fecha_emision;
+        @NotBlank
+        String cuitEmisor,
 
-    @NotBlank
-    private String cuit_emisor;
+        @NotBlank
+        String razonSocial,
 
-    @NotBlank
-    private String razon_social;
+        @NotBlank
+        @Size(max = 80)
+        String domicilioEmisor,
 
-    @NotBlank
-    @Size(max = 80)
-    private String domicilio_emisor;
+        @Min(0)
+        BigDecimal total,
 
-    @Min(0)
-    private BigDecimal total;
+        @NotNull
+        Long tipoFacturaId,
 
-    @NotNull
-    private Long CondicionIvaId;
+        @NotNull
+        Long condicionIvaId,
 
-    @NotNull
-    private Long EstadoFacturaId;
+        @NotNull
+        Long estadoFacturaId,
 
-    @NotNull
-    private Long TipoFacturaId;
-
+        @NotNull
+        Long pedidoId
+) {
 }

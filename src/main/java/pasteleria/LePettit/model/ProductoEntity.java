@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,11 +28,16 @@ public class ProductoEntity {
     private String nombre;
 
     @NotNull
-    private float precio;
+    private BigDecimal precio;
+
+    @NotNull
+    private int stock;
 
     @NotBlank
     @Size(max = 128)
     private String descripcion;
+
+    private boolean activo;
 
     @ManyToOne
     @JoinColumn(name = "id_categoria", nullable = false)

@@ -1,19 +1,51 @@
 package pasteleria.LePettit.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Component;
 import pasteleria.LePettit.dto.request.ProductoRequestDTO;
 import pasteleria.LePettit.dto.response.ProductoResponseDTO;
+import pasteleria.LePettit.model.CategoriaEntity;
 import pasteleria.LePettit.model.ProductoEntity;
 
-@Mapper(componentModel = "spring")
-public interface ProductoMapper {
+@Component
+@RequiredArgsConstructor
+public class ProductoMapper {
 
-    //DTO -> Entity
-    @Mapping(source = "categoriaId", target = "categoria.id")
-    ProductoEntity toEntity(ProductoRequestDTO dto);
+    private final ModelMapper modelMapper;
 
-    //Entity -> DTO
-    @Mapping(source = "categoria.nombre", target = "estadoEnvio")
-    ProductoResponseDTO toDto(ProductoEntity entity);
+    public ProductoEntity toEntity(ProductoRequestDTO dto) {
+        ProductoEntity producto = modelMapper.map(dto, ProductoEntity.class);
+
+        if (dto.categoriaId() != null) {
+            CategoriaEntity categoria = new CategoriaEntity();
+            categoria.setId(dto.categoriaId());
+            producto.setCategoria(categoria);
+        }
+
+        return producto;
+    }
+
+    public ProductoResponseDTO toDto(ProductoEntity entity) {
+        return new ProductoResponseDTO(
+                entity.getId(),
+                entity.getNombre(),
+                entity.getPrecio(),
+                entity.getStock(),
+                entity.getDescripcion(),
+                entity.isActivo(),
+                entity.getCategoria() != null ? entity.getCategoria().getNombre() : null
+        );
+    }
+
+    public void updateEntityFromDto(ProductoRequestDTO dto, ProductoEntity entity) {
+        modelMapper.map(dto, entity);
+
+        if (dto.categoriaId() != null) {
+            CategoriaEntity categoria = new CategoriaEntity();
+            categoria.setId(dto.categoriaId());
+            entity.setCategoria(categoria);
+        }
+    }
+
 }

@@ -2,23 +2,21 @@ package pasteleria.LePettit.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Data
-public class DetallePedidoRequestDTO {
+public record DetallePedidoRequestDTO(
+        @Min(1)
+        int cantidad,
 
-    @Min(1)
-    private int cantidad;
+        @NotNull
+        BigDecimal subtotal,
 
-    @NotNull
-    private BigDecimal subtotal;
+        @NotNull
+        Long idProducto,
 
-    @NotNull
-    private Long idProducto;
-
-    @NotNull
-    private Long idPedido;
+        @NotNull
+        Long idPedido
+) {
 
 }

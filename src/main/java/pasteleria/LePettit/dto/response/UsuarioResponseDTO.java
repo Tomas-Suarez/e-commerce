@@ -1,13 +1,11 @@
 package pasteleria.LePettit.dto.response;
 
-import lombok.Data;
+public record UsuarioResponseDTO(
+        Long id,
+        String username,
+        String email,
 
-@Data
-public class UsuarioResponseDTO {
-    private Long id;
-    private String username;
-    private String email;
-
-    private String rolNombre;
-    private ClienteResponseDTO cliente;
+        String rolNombre,
+        ClienteResponseDTO cliente
+) {
 }

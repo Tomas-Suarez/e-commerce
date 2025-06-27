@@ -3,22 +3,26 @@ package pasteleria.LePettit.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 
-@Data
-public class ProductoRequestDTO {
+import java.math.BigDecimal;
 
-    @NotBlank
-    @Size(max = 50)
-    private String nombre;
+public record ProductoRequestDTO(
+        @NotBlank
+        @Size(max = 50)
+        String nombre,
 
-    @NotNull
-    private float precio;
+        @NotNull
+        BigDecimal precio,
 
-    @NotBlank
-    @Size(max = 128)
-    private String descripcion;
+        @NotNull
+        int stock,
 
-    private Long categoriaId;
+        @NotBlank
+        @Size(max = 128)
+        String descripcion,
 
+        boolean activo,
+
+        Long categoriaId
+) {
 }

@@ -1,16 +1,14 @@
 package pasteleria.LePettit.dto.response;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
-public class PedidoResponseDTO {
+public record PedidoResponseDTO(
 
-    private LocalDateTime fecha;
-    private BigDecimal total;
+        LocalDateTime fecha,
+        BigDecimal total,
 
-    private ClienteResponseDTO cliente;
-    private String estadoPedido;
+        ClienteResponseDTO cliente,
+        String estadoPedido
+) {
 }

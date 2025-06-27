@@ -1,13 +1,14 @@
 package pasteleria.LePettit.dto.response;
 
-import lombok.Data;
+import java.math.BigDecimal;
 
-@Data
-public class ProductoResponseDTO {
-
-    private Long id;
-    private String nombre;
-    private float precio;
-    private String descripcion;
-    private String categoriaNombre;
+public record ProductoResponseDTO(
+        Long id,
+        String nombre,
+        BigDecimal precio,
+        int stock,
+        String descripcion,
+        boolean activo,
+        String categoriaNombre
+) {
 }

@@ -1,18 +1,16 @@
 package pasteleria.LePettit.dto.response;
 
-import lombok.Data;
-
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
-public class CarritoResponseDTO {
+public record CarritoResponseDTO(
 
-    private Long id;
-    private LocalDate fecha;
-    private boolean activo;
+        Long id,
+        LocalDate fecha,
+        boolean activo,
 
-    private ClienteResponseDTO cliente;
+        ClienteResponseDTO cliente,
 
-    private List<DetalleCarritoResponseDTO> productos;
+        List<DetalleCarritoResponseDTO> productos
+) {
 }
