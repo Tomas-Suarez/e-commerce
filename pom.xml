@@ -11,7 +11,7 @@
 	</parent>
 
 	<groupId>pasteleria</groupId>
-	<artifactId>LePettit</artifactId>
+	<artifactId>Ecommerce</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>LePettit</name>
 	<description>E-Commerce - LePettit</description>
