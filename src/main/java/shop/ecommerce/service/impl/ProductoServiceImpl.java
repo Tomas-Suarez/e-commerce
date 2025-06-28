@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.ecommerce.dto.request.ProductoRequestDTO;
 import shop.ecommerce.dto.response.ProductoResponseDTO;
-import shop.ecommerce.exception.NotFoundException;
+import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.ProductoMapper;
 import shop.ecommerce.model.CategoriaEntity;
 import shop.ecommerce.model.ProductoEntity;
@@ -30,7 +30,7 @@ public class ProductoServiceImpl implements ProductoService {
 
         CategoriaEntity categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(() ->
-                        new NotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
+                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
 
         ProductoEntity producto = productoMapper.toEntity(dto);
         producto.setCategoria(categoria);
@@ -67,12 +67,17 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponseDTO obtenerProductoPorId(Long id) {
         ProductoEntity productoEntity = productoRepository.findById(id)
                 .orElseThrow(()->
-                        new NotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
         return productoMapper.toDto(productoEntity);
     }
 
     @Override
     public List<ProductoResponseDTO> obtenerPorCategoriaId(Long categoriaId) {
+
+        if(!categoriaRepository.existsById(categoriaId)){
+            throw new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + categoriaId);
+        }
+
         List<ProductoEntity> productos = productoRepository.findByCategoriaIdAndActivoTrue(categoriaId);
         return productos.stream()
                 .map(productoMapper::toDto)
@@ -83,11 +88,11 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponseDTO actualizarProducto(Long id, ProductoRequestDTO dto) {
         ProductoEntity producto = productoRepository.findById(id)
                 .orElseThrow(()->
-                        new NotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
 
         CategoriaEntity categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(()->
-                        new NotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
+                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
 
         productoMapper.updateEntityFromDto(dto, producto);
         producto.setCategoria(categoria);
@@ -99,7 +104,7 @@ public class ProductoServiceImpl implements ProductoService {
     public void borradoLogicoProducto(Long id) {
         ProductoEntity producto = productoRepository.findById(id)
                 .orElseThrow(()->
-                        new NotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
 
         producto.setActivo(false);
         productoRepository.save(producto);

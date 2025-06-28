@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.ecommerce.dto.request.ProductoRequestDTO;
 import shop.ecommerce.dto.response.ProductoResponseDTO;
-import shop.ecommerce.exception.NotFoundException;
+import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.ProductoMapper;
 import shop.ecommerce.model.CategoriaEntity;
 import shop.ecommerce.model.ProductoEntity;
@@ -26,6 +26,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceImplTest {
+
+    private static final Long CATEGORIA_ID = 1L;
+    private static final Long PRODUCTO_ID = 10L;
 
     @Mock
     private ProductoRepository productoRepository;
@@ -52,16 +55,16 @@ class ProductoServiceImplTest {
                 20,
                 "Soy una descripcion",
                 true,
-                1L
+                CATEGORIA_ID
         );
 
         categoria = CategoriaEntity.builder()
-                .id(1L)
+                .id(CATEGORIA_ID)
                 .nombre("Tortas")
                 .build();
 
         productoEntity = ProductoEntity.builder()
-                .id(10L)
+                .id(PRODUCTO_ID)
                 .nombre(requestDTO.nombre())
                 .descripcion(requestDTO.descripcion())
                 .precio(requestDTO.precio())
@@ -83,7 +86,7 @@ class ProductoServiceImplTest {
 
     @Test
     void crearProducto_exitosamente(){
-        when(categoriaRepository.findById(1L)).thenReturn(Optional.of(categoria));
+        when(categoriaRepository.findById(CATEGORIA_ID)).thenReturn(Optional.of(categoria));
         when(productoMapper.toEntity(requestDTO)).thenReturn(productoEntity);
         when(productoRepository.save(productoEntity)).thenReturn(productoEntity);
         when(productoMapper.toDto(productoEntity)).thenReturn(responseDTO);
@@ -98,9 +101,9 @@ class ProductoServiceImplTest {
 
     @Test
     void crearProducto_sinCategoriaExistente_LanzaException(){
-        when(categoriaRepository.findById(1L)).thenReturn(Optional.empty());
+        when(categoriaRepository.findById(CATEGORIA_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
+        assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> service.crearProducto(requestDTO));
 
         verify(productoRepository, never()).save(any());
@@ -129,7 +132,7 @@ class ProductoServiceImplTest {
                 .descripcion("Descripcion")
                 .precio(new BigDecimal("5000"))
                 .stock(5)
-                .activo(false)  // <-- Inactivo
+                .activo(false)
                 .categoria(categoria)
                 .build();
 
@@ -157,48 +160,48 @@ class ProductoServiceImplTest {
 
     @Test
     void obtenerProductoPorId_Correctamente(){
-        when(productoRepository.findById(10L)).thenReturn(Optional.of(productoEntity));
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.of(productoEntity));
         when(productoMapper.toDto(productoEntity)).thenReturn(responseDTO);
 
-        ProductoResponseDTO resultado = service.obtenerProductoPorId(10L);
+        ProductoResponseDTO resultado = service.obtenerProductoPorId(PRODUCTO_ID);
 
         assertThat(resultado).isEqualTo(responseDTO);
 
-        verify(productoRepository).findById(10L);
+        verify(productoRepository).findById(PRODUCTO_ID);
         System.out.println(resultado);
     }
 
     @Test
     void obtenerProductoPorId_NoExistente_LanzaException(){
-        when(productoRepository.findById(2L)).thenReturn(Optional.empty());
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(()-> service.obtenerProductoPorId(2L));
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(()-> service.obtenerProductoPorId(PRODUCTO_ID));
 
-        verify(productoRepository).findById(2L);
+        verify(productoRepository).findById(PRODUCTO_ID);
 
         verify(productoMapper, never()).toDto(productoEntity);
     }
 
     @Test
     void actualizarUnProducto_existente(){
-        when(productoRepository.findById(10L)).thenReturn(Optional.of(productoEntity));
-        when(categoriaRepository.findById(1L)).thenReturn(Optional.of(categoria));
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.of(productoEntity));
+        when(categoriaRepository.findById(CATEGORIA_ID)).thenReturn(Optional.of(categoria));
         doNothing().when(productoMapper).updateEntityFromDto(requestDTO, productoEntity);
         when(productoRepository.save(productoEntity)).thenReturn(productoEntity);
         when(productoMapper.toDto(productoEntity)).thenReturn(responseDTO);
 
-        ProductoResponseDTO resultado = service.actualizarProducto(10L, requestDTO);
+        ProductoResponseDTO resultado = service.actualizarProducto(PRODUCTO_ID, requestDTO);
 
         assertThat(resultado).isEqualTo(responseDTO);
     }
 
     @Test
     void actualizarProducto_productoNoExistente_LanzaException(){
-        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(()-> service.actualizarProducto(99L, requestDTO));
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(()-> service.actualizarProducto(PRODUCTO_ID, requestDTO));
 
         verify(productoRepository, never()).save(any());
         verify(productoMapper, never()).updateEntityFromDto(any(), any());
@@ -206,11 +209,11 @@ class ProductoServiceImplTest {
 
     @Test
     void actualizarProducto_categoriaNoExistente_LanzaException(){
-        when(productoRepository.findById(10L)).thenReturn(Optional.of(productoEntity));
-        when(categoriaRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.of(productoEntity));
+        when(categoriaRepository.findById(CATEGORIA_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(()-> service.actualizarProducto(10L, requestDTO));
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(()-> service.actualizarProducto(PRODUCTO_ID, requestDTO));
 
         verify(productoRepository, never()).save(any());
         verify(productoMapper, never()).updateEntityFromDto(any(), any());
@@ -218,8 +221,8 @@ class ProductoServiceImplTest {
 
     @Test
     void borradoLogico_porProductoExistente(){
-        when(productoRepository.findById(10L)).thenReturn(Optional.of(productoEntity));
-        service.borradoLogicoProducto(10L);
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.of(productoEntity));
+        service.borradoLogicoProducto(PRODUCTO_ID);
 
         assertThat(productoEntity.isActivo()).isFalse();
         verify(productoRepository).save(productoEntity);
@@ -228,10 +231,10 @@ class ProductoServiceImplTest {
 
     @Test
     void borradoLogico_ProductoNoExistente_LanzarException(){
-        when(productoRepository.findById(10L)).thenReturn(Optional.empty());
+        when(productoRepository.findById(PRODUCTO_ID)).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NotFoundException.class)
-                .isThrownBy(()-> service.borradoLogicoProducto(10L));
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(()-> service.borradoLogicoProducto(PRODUCTO_ID));
 
         verify(productoRepository, never()).save(any());
     }
@@ -239,17 +242,28 @@ class ProductoServiceImplTest {
     @Test
     void obtenerProductos_porCategoria(){
         List<ProductoEntity> productos = List.of(productoEntity);
-        when(productoRepository.findByCategoriaIdAndActivoTrue(1L)).thenReturn(productos);
+
+        when(categoriaRepository.existsById(CATEGORIA_ID)).thenReturn(true);
+        when(productoRepository.findByCategoriaIdAndActivoTrue(CATEGORIA_ID)).thenReturn(productos);
         when(productoMapper.toDto(productoEntity)).thenReturn(responseDTO);
 
-        List<ProductoResponseDTO> resultado = service.obtenerPorCategoriaId(1L);
+        List<ProductoResponseDTO> resultado = service.obtenerPorCategoriaId(CATEGORIA_ID);
 
-        verify(productoRepository).findByCategoriaIdAndActivoTrue(1L);
+        verify(productoRepository).findByCategoriaIdAndActivoTrue(CATEGORIA_ID);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0)).isEqualTo(responseDTO);
 
         System.out.println(resultado);
+    }
+    @Test
+    void obtenerProductos_porCategoriaNoExistente_LanzarException(){
+        when(categoriaRepository.existsById(CATEGORIA_ID)).thenReturn(false);
+
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(()-> service.obtenerPorCategoriaId(CATEGORIA_ID));
+
+        verify(productoRepository, never()).findByCategoriaIdAndActivoTrue(any());
     }
 
 }
