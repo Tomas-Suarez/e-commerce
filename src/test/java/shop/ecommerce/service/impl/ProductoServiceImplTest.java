@@ -23,12 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static shop.ecommerce.constants.TestConstants.CATEGORIA_ID;
+import static shop.ecommerce.constants.TestConstants.PRODUCTO_ID;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceImplTest {
-
-    private static final Long CATEGORIA_ID = 1L;
-    private static final Long PRODUCTO_ID = 10L;
 
     @Mock
     private ProductoRepository productoRepository;

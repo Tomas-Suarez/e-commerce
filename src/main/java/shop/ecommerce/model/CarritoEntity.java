@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -29,4 +30,7 @@ public class CarritoEntity {
     @OneToOne
     @JoinColumn(name = "id_cliente", nullable = false)
     private ClienteEntity cliente;
+
+    @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DetalleCarritoEntity> productos;
 }

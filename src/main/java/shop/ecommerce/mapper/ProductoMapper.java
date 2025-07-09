@@ -14,13 +14,17 @@ public class ProductoMapper {
 
     private final ModelMapper modelMapper;
 
+    private CategoriaEntity crearCategoriaPorId(Long idCategoria) {
+        CategoriaEntity categoria = new CategoriaEntity();
+        categoria.setId(idCategoria);
+        return categoria;
+    }
+
     public ProductoEntity toEntity(ProductoRequestDTO dto) {
         ProductoEntity producto = modelMapper.map(dto, ProductoEntity.class);
 
         if (dto.categoriaId() != null) {
-            CategoriaEntity categoria = new CategoriaEntity();
-            categoria.setId(dto.categoriaId());
-            producto.setCategoria(categoria);
+            producto.setCategoria(crearCategoriaPorId(dto.categoriaId()));
         }
 
         return producto;
@@ -42,9 +46,7 @@ public class ProductoMapper {
         modelMapper.map(dto, entity);
 
         if (dto.categoriaId() != null) {
-            CategoriaEntity categoria = new CategoriaEntity();
-            categoria.setId(dto.categoriaId());
-            entity.setCategoria(categoria);
+            entity.setCategoria(crearCategoriaPorId(dto.categoriaId()));
         }
     }
 

@@ -14,8 +14,7 @@ import shop.ecommerce.service.ProductoService;
 
 import java.util.List;
 
-import static shop.ecommerce.constants.ProductoConstants.CATEGORIA_NO_ENCONTRADA;
-import static shop.ecommerce.constants.ProductoConstants.PRODUCTO_NO_ENCONTRADO;
+import static shop.ecommerce.constants.ProductoConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class ProductoServiceImpl implements ProductoService {
 
         CategoriaEntity categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
+                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA_POR_ID + dto.categoriaId()));
 
         ProductoEntity producto = productoMapper.toEntity(dto);
         producto.setCategoria(categoria);
@@ -55,7 +54,7 @@ public class ProductoServiceImpl implements ProductoService {
     public List<ProductoResponseDTO> obtenerProductosInactivos() {
         List<ProductoEntity> productos = productoRepository.findAll()
                 .stream()
-                .filter(productoEntity-> !productoEntity.isActivo())
+                .filter(productoEntity -> !productoEntity.isActivo())
                 .toList();
 
         return productos.stream()
@@ -66,16 +65,16 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public ProductoResponseDTO obtenerProductoPorId(Long id) {
         ProductoEntity productoEntity = productoRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO_POR_ID + id));
         return productoMapper.toDto(productoEntity);
     }
 
     @Override
     public List<ProductoResponseDTO> obtenerPorCategoriaId(Long categoriaId) {
 
-        if(!categoriaRepository.existsById(categoriaId)){
-            throw new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + categoriaId);
+        if (!categoriaRepository.existsById(categoriaId)) {
+            throw new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA_POR_ID + categoriaId);
         }
 
         List<ProductoEntity> productos = productoRepository.findByCategoriaIdAndActivoTrue(categoriaId);
@@ -87,12 +86,12 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public ProductoResponseDTO actualizarProducto(Long id, ProductoRequestDTO dto) {
         ProductoEntity producto = productoRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO_POR_ID + id));
 
         CategoriaEntity categoria = categoriaRepository.findById(dto.categoriaId())
-                .orElseThrow(()->
-                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA + dto.categoriaId()));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CATEGORIA_NO_ENCONTRADA_POR_ID + dto.categoriaId()));
 
         productoMapper.updateEntityFromDto(dto, producto);
         producto.setCategoria(categoria);
@@ -103,8 +102,8 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public void borradoLogicoProducto(Long id) {
         ProductoEntity producto = productoRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO + id));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(PRODUCTO_NO_ENCONTRADO_POR_ID + id));
 
         producto.setActivo(false);
         productoRepository.save(producto);

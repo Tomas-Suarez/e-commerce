@@ -22,12 +22,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static shop.ecommerce.constants.TestConstants.CLIENTE_DNI;
+import static shop.ecommerce.constants.TestConstants.CLIENTE_ID;
 
 @ExtendWith(MockitoExtension.class)
 public class ClienteServiceImpTest {
-
-    private static final Long CLIENTE_ID = 5L;
-    private static final String CLIENTE_DNI = "44642212";
 
     @Mock
     private ClienteRepository clienteRepository;

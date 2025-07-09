@@ -43,4 +43,6 @@ public class ProductoEntity {
     @JoinColumn(name = "id_categoria", nullable = false)
     private CategoriaEntity categoria;
 
+    // TODO: Revisar el comportamiento del encapsulado
+
 }

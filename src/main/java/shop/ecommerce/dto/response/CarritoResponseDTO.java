@@ -5,7 +5,6 @@ import java.util.List;
 
 public record CarritoResponseDTO(
 
-        Long id,
         LocalDate fecha,
         boolean activo,
 

@@ -19,14 +19,14 @@ import static shop.ecommerce.constants.ClienteConstants.*;
 @RequiredArgsConstructor
 public class ClienteServiceImp implements ClienteService {
 
-    private ClienteRepository clienteRepository;
-    private ClienteMapper clienteMapper;
+    private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
 
 
     @Override
     public ClienteResponseDTO crearCliente(ClienteRequestDTO dto) {
 
-        if(clienteRepository.existsByDni(dto.dni())){
+        if (clienteRepository.existsByDni(dto.dni())) {
             throw new DuplicatedResourceException(DNI_EXISTENTE + dto.dni());
         }
 
@@ -47,7 +47,7 @@ public class ClienteServiceImp implements ClienteService {
     @Override
     public ClienteResponseDTO obtenerClientePorId(Long idCliente) {
         ClienteEntity clienteEntity = clienteRepository.findById(idCliente)
-                .orElseThrow(()->
+                .orElseThrow(() ->
                         new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + idCliente));
         return clienteMapper.toDto(clienteEntity);
     }
@@ -55,7 +55,7 @@ public class ClienteServiceImp implements ClienteService {
     @Override
     public ClienteResponseDTO obtenerClientePorDni(String dni) {
         ClienteEntity clienteEntity = clienteRepository.findByDni(dni)
-                .orElseThrow(()->
+                .orElseThrow(() ->
                         new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_DNI + dni));
         return clienteMapper.toDto(clienteEntity);
     }
