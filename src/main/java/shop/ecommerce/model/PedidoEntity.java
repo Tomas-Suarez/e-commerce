@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -35,5 +37,12 @@ public class PedidoEntity {
     @ManyToOne
     @JoinColumn(name = "id_estado_pedido", nullable = false)
     private EstadoPedidoEntity estadoPedido;
+
+    @ManyToOne
+    @JoinColumn(name = "id_carrito", nullable = true)
+    private CarritoEntity carrito;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetallePedidoEntity> detalles = new ArrayList<>();
 
 }

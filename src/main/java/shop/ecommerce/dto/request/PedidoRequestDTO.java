@@ -16,6 +16,9 @@ public record PedidoRequestDTO(
         Long idCliente,
 
         @NotNull
-        Long idEstadoPedido
+        Long idEstadoPedido,
+
+        @NotNull
+        Long idCarrito
 ) {
 }

@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.ecommerce.dto.request.CarritoRequestDTO;
-import shop.ecommerce.dto.response.CarritoResponseDTO;
-import shop.ecommerce.dto.response.ClienteResponseDTO;
-import shop.ecommerce.dto.response.DetalleCarritoResponseDTO;
-import shop.ecommerce.dto.response.ProductoResponseDTO;
+import shop.ecommerce.dto.response.*;
 import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.CarritoMapper;
 import shop.ecommerce.model.CarritoEntity;
@@ -18,9 +16,11 @@ import shop.ecommerce.model.ClienteEntity;
 import shop.ecommerce.model.DetalleCarritoEntity;
 import shop.ecommerce.repository.CarritoRepository;
 import shop.ecommerce.repository.ClienteRepository;
+import shop.ecommerce.service.PedidoService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +43,10 @@ public class CarritoServiceImpTest {
     @Mock
     private CarritoMapper carritoMapper;
 
+    @Mock
+    private PedidoService pedidoService;
+
+    @Spy
     @InjectMocks
     private CarritoServiceImp service;
 
@@ -84,7 +88,6 @@ public class CarritoServiceImpTest {
                 clienteEntity.getDireccion()
         );
 
-        // Podés usar un producto dummy o null si no querés complicar el test aún
         ProductoResponseDTO productoDTO = new ProductoResponseDTO(
                 1L,
                 "Producto Test",
@@ -163,7 +166,7 @@ public class CarritoServiceImpTest {
     }
 
     @Test
-    void obtenerCarritoPorId_NoExiste_LanzaException(){
+    void obtenerCarritoPorId_NoExiste_LanzaException() {
         when(carritoRepository.findById(CARRITO_ID)).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -187,7 +190,7 @@ public class CarritoServiceImpTest {
     }
 
     @Test
-    void obtenerClientePorId_NoExiste_LanzaException(){
+    void obtenerClientePorId_NoExiste_LanzaException() {
         when(carritoRepository.findByClienteIdAndActivoTrue(CLIENTE_ID)).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -198,7 +201,7 @@ public class CarritoServiceImpTest {
     }
 
     @Test
-    void vaciarCarrito_correctamente(){
+    void vaciarCarrito_correctamente() {
         when(carritoRepository.findById(CARRITO_ID)).thenReturn(Optional.of(carritoEntity));
 
         service.vaciarCarrito(CARRITO_ID);
@@ -208,7 +211,7 @@ public class CarritoServiceImpTest {
     }
 
     @Test
-    void vaciarCarrito_noExiste_LanzaException(){
+    void vaciarCarrito_noExiste_LanzaException() {
         when(carritoRepository.findById(CARRITO_ID)).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -218,8 +221,41 @@ public class CarritoServiceImpTest {
 
     }
 
-    //Finalizar carrito - pendiente
+    @Test
+    void finalizarCarrito_exitosamente() {
+        PedidoResponseDTO pedidoResponse = new PedidoResponseDTO(
+                LocalDateTime.now(),
+                BigDecimal.valueOf(200L),
+                null,
+                "PENDIENTE"
+        );
 
+        ClienteEntity cliente = new ClienteEntity();
+        cliente.setId(CLIENTE_ID);
+        carritoEntity.setCliente(cliente);
+
+        when(carritoRepository.findById(CARRITO_ID)).thenReturn(Optional.of(carritoEntity));
+
+        when(pedidoService.crearPedidoDesdeCarrito(CLIENTE_ID)).thenReturn(pedidoResponse);
+        when(carritoMapper.toDto(any(CarritoEntity.class))).thenReturn(responseDTO);
+        doNothing().when(service).vaciarCarrito(CARRITO_ID);
+        doReturn(responseDTO).when(service).crearCarrito(any(CarritoRequestDTO.class));
+
+        FinalizarCarritoResponseDTO resultado = service.finalizarCarrito(CARRITO_ID);
+
+        System.out.println(resultado);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.carritoFinalizado()).isEqualTo(responseDTO);
+        assertThat(resultado.pedidoGenerado()).isEqualTo(pedidoResponse);
+
+
+        verify(carritoRepository).save(carritoEntity);
+        verify(pedidoService).crearPedidoDesdeCarrito(CLIENTE_ID);
+        verify(service).vaciarCarrito(CARRITO_ID);
+        verify(service).crearCarrito(any(CarritoRequestDTO.class));
+
+    }
 
 
 }

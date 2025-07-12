@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.ecommerce.dto.request.CarritoRequestDTO;
 import shop.ecommerce.dto.response.CarritoResponseDTO;
+import shop.ecommerce.dto.response.FinalizarCarritoResponseDTO;
+import shop.ecommerce.dto.response.PedidoResponseDTO;
 import shop.ecommerce.exception.InactiveCartException;
 import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.CarritoMapper;
@@ -13,6 +15,7 @@ import shop.ecommerce.model.ClienteEntity;
 import shop.ecommerce.repository.CarritoRepository;
 import shop.ecommerce.repository.ClienteRepository;
 import shop.ecommerce.service.CarritoService;
+import shop.ecommerce.service.PedidoService;
 
 import java.time.LocalDate;
 
@@ -25,9 +28,11 @@ public class CarritoServiceImp implements CarritoService {
 
     private final CarritoRepository carritoRepository;
     private final CarritoMapper carritoMapper;
+    private final PedidoService pedidoService;
     private final ClienteRepository clienteRepository;
 
     @Override
+    @Transactional
     public CarritoResponseDTO crearCarrito(CarritoRequestDTO dto) {
 
         ClienteEntity clienteEntity = clienteRepository.findById(dto.clienteId())
@@ -77,7 +82,7 @@ public class CarritoServiceImp implements CarritoService {
 
     @Override
     @Transactional
-    public CarritoResponseDTO finalizarCarrito(Long carritoId) {
+    public FinalizarCarritoResponseDTO finalizarCarrito(Long carritoId) {
 
         CarritoEntity carritoEntity = carritoRepository.findById(carritoId)
                 .orElseThrow(() ->
@@ -90,8 +95,18 @@ public class CarritoServiceImp implements CarritoService {
         carritoEntity.setActivo(false);
         carritoRepository.save(carritoEntity);
 
-        //TODO: falta implememtar la logica de registrar pedido, cuando se finaliza el carrito
+        Long clienteId = carritoEntity.getCliente().getId();
+        PedidoResponseDTO pedido = pedidoService.crearPedidoDesdeCarrito(clienteId);
 
-        return carritoMapper.toDto(carritoEntity);
+        vaciarCarrito(carritoId);
+
+        CarritoRequestDTO nuevoCarritoDTO = new CarritoRequestDTO(LocalDate.now(), true, clienteId);
+        CarritoResponseDTO nuevoCarrito = crearCarrito(nuevoCarritoDTO);
+
+        return new FinalizarCarritoResponseDTO(
+                carritoMapper.toDto(carritoEntity),
+                nuevoCarrito,
+                pedido
+        );
     }
 }

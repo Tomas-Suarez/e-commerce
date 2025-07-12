@@ -26,7 +26,7 @@ public class DetallePedidoEntity {
     private int cantidad;
 
     @NotNull
-    private BigDecimal subtotal;
+    private BigDecimal precioUnitario;
 
     @ManyToOne
     @JoinColumn(name = "id_producto", nullable = false)
@@ -35,4 +35,8 @@ public class DetallePedidoEntity {
     @ManyToOne
     @JoinColumn(name = "id_pedido", nullable = false)
     private PedidoEntity pedido;
+
+    public BigDecimal calcularSubTotal() {
+        return precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+    }
 }
