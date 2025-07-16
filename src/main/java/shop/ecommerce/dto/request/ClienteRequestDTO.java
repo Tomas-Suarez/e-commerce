@@ -23,10 +23,7 @@ public record ClienteRequestDTO(
                 regexp = "^\\+?\\d{1,4}?[\\s.-]?\\(?\\d{1,4}\\)?[\\s.-]?\\d{3,4}[\\s.-]?\\d{3,4}$",
                 message = "El teléfono debe tener un formato válido"
         )
-        String telefono,
+        String telefono
 
-        @NotBlank
-        @Size(max = 80)
-        String direccion
 ) {
 }

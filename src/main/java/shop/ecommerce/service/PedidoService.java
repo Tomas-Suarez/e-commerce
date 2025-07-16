@@ -1,5 +1,6 @@
 package shop.ecommerce.service;
 
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.request.PedidoRequestDTO;
 import shop.ecommerce.dto.response.PedidoResponseDTO;
 
@@ -9,7 +10,7 @@ public interface PedidoService {
 
     PedidoResponseDTO crearPedido(PedidoRequestDTO dto);
 
-    PedidoResponseDTO crearPedidoDesdeCarrito(Long idCliente);
+    PedidoResponseDTO crearPedidoDesdeCarrito(Long idCliente, DireccionRequestDTO direccionDTO);
 
     PedidoResponseDTO obtenerPedidoPorId(Long idPedido);
 

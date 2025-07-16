@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.ecommerce.dto.request.CarritoRequestDTO;
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.response.*;
 import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.CarritoMapper;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
+import static shop.ecommerce.constants.PedidoConstants.COSTO_ENVIO;
 import static shop.ecommerce.constants.TestConstants.CARRITO_ID;
 import static shop.ecommerce.constants.TestConstants.CLIENTE_ID;
 
@@ -69,7 +71,6 @@ public class CarritoServiceImpTest {
                 .apellido("Sanchez")
                 .dni("1222323")
                 .telefono("4423233")
-                .direccion("av falsa")
                 .build();
 
         carritoEntity = CarritoEntity.builder()
@@ -84,8 +85,7 @@ public class CarritoServiceImpTest {
                 clienteEntity.getNombre(),
                 clienteEntity.getApellido(),
                 clienteEntity.getDni(),
-                clienteEntity.getTelefono(),
-                clienteEntity.getDireccion()
+                clienteEntity.getTelefono()
         );
 
         ProductoResponseDTO productoDTO = new ProductoResponseDTO(
@@ -223,10 +223,29 @@ public class CarritoServiceImpTest {
 
     @Test
     void finalizarCarrito_exitosamente() {
+
+        DireccionRequestDTO direccionRequestDTO = new DireccionRequestDTO(
+                5700,
+                "Calle 123",
+                27,
+                null,
+                "Casa con rejas"
+        );
+
+        DireccionResponseDTO direccionResponseDTO = new DireccionResponseDTO(
+                direccionRequestDTO.codigo_postal(),
+                direccionRequestDTO.calle(),
+                direccionRequestDTO.numero(),
+                direccionRequestDTO.piso(),
+                direccionRequestDTO.referencia()
+        );
+
         PedidoResponseDTO pedidoResponse = new PedidoResponseDTO(
                 LocalDateTime.now(),
+                COSTO_ENVIO,
                 BigDecimal.valueOf(200L),
                 null,
+                direccionResponseDTO,
                 "PENDIENTE"
         );
 
@@ -236,12 +255,12 @@ public class CarritoServiceImpTest {
 
         when(carritoRepository.findById(CARRITO_ID)).thenReturn(Optional.of(carritoEntity));
 
-        when(pedidoService.crearPedidoDesdeCarrito(CLIENTE_ID)).thenReturn(pedidoResponse);
+        when(pedidoService.crearPedidoDesdeCarrito(CLIENTE_ID, direccionRequestDTO)).thenReturn(pedidoResponse);
         when(carritoMapper.toDto(any(CarritoEntity.class))).thenReturn(responseDTO);
         doNothing().when(service).vaciarCarrito(CARRITO_ID);
         doReturn(responseDTO).when(service).crearCarrito(any(CarritoRequestDTO.class));
 
-        FinalizarCarritoResponseDTO resultado = service.finalizarCarrito(CARRITO_ID);
+        FinalizarCarritoResponseDTO resultado = service.finalizarCarrito(CARRITO_ID, direccionRequestDTO);
 
         System.out.println(resultado);
 
@@ -251,11 +270,10 @@ public class CarritoServiceImpTest {
 
 
         verify(carritoRepository).save(carritoEntity);
-        verify(pedidoService).crearPedidoDesdeCarrito(CLIENTE_ID);
+        verify(pedidoService).crearPedidoDesdeCarrito(CLIENTE_ID, direccionRequestDTO);
         verify(service).vaciarCarrito(CARRITO_ID);
         verify(service).crearCarrito(any(CarritoRequestDTO.class));
 
     }
-
 
 }

@@ -3,9 +3,11 @@ package shop.ecommerce.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.request.PedidoRequestDTO;
 import shop.ecommerce.dto.response.PedidoResponseDTO;
 import shop.ecommerce.exception.ResourceNotFoundException;
+import shop.ecommerce.mapper.DireccionMapper;
 import shop.ecommerce.mapper.PedidoMapper;
 import shop.ecommerce.model.*;
 import shop.ecommerce.repository.*;
@@ -27,10 +29,11 @@ public class PedidoServiceImp implements PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final PedidoMapper pedidoMapper;
-    private final ClienteRepository clienteRepository;
+    private final DireccionMapper direccionMapper;
     private final EstadoPedidoRepository estadoPedidoRepository;
-    private final CarritoRepository carritoRepository;
     private final DetalleCarritoRepository detalleCarritoRepository;
+    private final ClienteRepository clienteRepository;
+    private final CarritoRepository carritoRepository;
 
     private PedidoEntity construirPedidoDesdeDTO(PedidoRequestDTO dto,
                                                  ClienteEntity cliente,
@@ -43,39 +46,32 @@ public class PedidoServiceImp implements PedidoService {
         return pedido;
     }
 
-    private EstadoPedidoEntity obtenerEstadoPedidoPorIdOExcepcion(Long idEstadoPedido) {
-        return estadoPedidoRepository.findById(idEstadoPedido)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(ESTADO_PEDIDO_NO_ENCONTRADO_POR_ID + idEstadoPedido));
-    }
+    private List<DetallePedidoEntity> construirDetallesPedido(
+            PedidoEntity pedido,
+            List<DetalleCarritoEntity> productosCarrito) {
 
-    private ClienteEntity obtenerClientePorIdOExcepcion(Long idCliente) {
-        return clienteRepository.findById(idCliente)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + idCliente));
+        return productosCarrito.stream().map(detCarrito ->
+                DetallePedidoEntity.builder()
+                        .pedido(pedido)
+                        .producto(detCarrito.getProducto())
+                        .cantidad(detCarrito.getCantidad())
+                        .precioUnitario(detCarrito.getProducto().getPrecio())
+                        .build()
+        ).toList();
     }
-
-    private CarritoEntity obtenerCarritoActivoPorClienteIdOExcepcion(Long idCliente) {
-        return carritoRepository.findByClienteIdAndActivoTrue(idCliente)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(CARRITO_NO_ENCONTRADO_POR_CLIENTE + idCliente));
-    }
-
-    private PedidoEntity obtenerPedidoPorIdOExcepcion(Long idPedido){
-        return pedidoRepository.findById(idPedido)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(PEDIDO_NO_ENCONTRADO_POR_ID + idPedido));
-    }
-
 
 
     @Override
     @Transactional
     public PedidoResponseDTO crearPedido(PedidoRequestDTO dto) {
 
-        ClienteEntity cliente = obtenerClientePorIdOExcepcion(dto.idCliente());
+        ClienteEntity cliente = clienteRepository.findById(dto.idCliente())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + dto.idCliente()));
 
-        EstadoPedidoEntity estadoPedido = obtenerEstadoPedidoPorIdOExcepcion(dto.idEstadoPedido());
+        EstadoPedidoEntity estadoPedido = estadoPedidoRepository.findById(dto.idEstadoPedido())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(ESTADO_PEDIDO_NO_ENCONTRADO_POR_ID + dto.idEstadoPedido()));
 
         PedidoEntity pedido = construirPedidoDesdeDTO(dto, cliente, estadoPedido);
 
@@ -83,15 +79,19 @@ public class PedidoServiceImp implements PedidoService {
     }
 
     @Override
-    public PedidoResponseDTO crearPedidoDesdeCarrito(Long idCliente) {
+    public PedidoResponseDTO crearPedidoDesdeCarrito(Long idCliente, DireccionRequestDTO direccionDTO) {
 
-        ClienteEntity cliente = obtenerClientePorIdOExcepcion(idCliente);
+        ClienteEntity cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + idCliente));
 
-        CarritoEntity carrito = obtenerCarritoActivoPorClienteIdOExcepcion(idCliente);
+        CarritoEntity carrito = carritoRepository.findByClienteIdAndActivoTrue(idCliente)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CARRITO_NO_ENCONTRADO_POR_CLIENTE + idCliente));
 
-        List<DetalleCarritoEntity> productosDelCarrito = detalleCarritoRepository.findByCarritoId(carrito.getId());
+        List<DetalleCarritoEntity> productosCarrito = detalleCarritoRepository.findByCarritoId(carrito.getId());
 
-        if (productosDelCarrito.isEmpty()) {
+        if (productosCarrito.isEmpty()) {
             throw new IllegalStateException(CARRITO_VACIO);
         }
 
@@ -99,26 +99,18 @@ public class PedidoServiceImp implements PedidoService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException(ESTADO_PEDIDO_NO_ENCONTRADO_POR_NOMBRE + ESTADO_PEDIDO_PENDIENTE));
 
-        PedidoEntity pedido = new PedidoEntity();
-        pedido.setCliente(cliente);
-        pedido.setEstadoPedido(estadoInicial);
-        pedido.setFecha(LocalDateTime.now());
+        PedidoEntity pedido = PedidoEntity.builder()
+                .cliente(cliente)
+                .carrito(carrito)
+                .estadoPedido(estadoInicial)
+                .fecha(LocalDateTime.now())
+                .direccion(direccionMapper.toEntity(direccionDTO))
+                .build();
 
-        List<DetallePedidoEntity> detallePedido = productosDelCarrito.stream().map(detCarrito -> {
-            DetallePedidoEntity detPedido = new DetallePedidoEntity();
-            detPedido.setPedido(pedido);
-            detPedido.setProducto(detCarrito.getProducto());
-            detPedido.setCantidad(detCarrito.getCantidad());
-            detPedido.setPrecioUnitario(detCarrito.getProducto().getPrecio());
-            return detPedido;
-        }).toList();
+        List<DetallePedidoEntity> detalles = construirDetallesPedido(pedido, productosCarrito);
 
-        BigDecimal total = detallePedido.stream()
-                .map(DetallePedidoEntity::calcularSubTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        pedido.setTotal(total);
-        pedido.setDetalles(detallePedido);
+        pedido.setDetalles(detalles);
+        pedido.setTotal(pedido.calcularTotal());
         pedidoRepository.save(pedido);
 
         return pedidoMapper.toDto(pedido);
@@ -127,7 +119,9 @@ public class PedidoServiceImp implements PedidoService {
     @Override
     public PedidoResponseDTO obtenerPedidoPorId(Long idPedido) {
 
-        PedidoEntity pedido = obtenerPedidoPorIdOExcepcion(idPedido);
+        PedidoEntity pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(PEDIDO_NO_ENCONTRADO_POR_ID + idPedido));
 
         return pedidoMapper.toDto(pedido);
     }
@@ -135,7 +129,9 @@ public class PedidoServiceImp implements PedidoService {
     @Override
     public List<PedidoResponseDTO> obtenerPedidosPendientesPorCliente(Long idCliente) {
 
-        obtenerClientePorIdOExcepcion(idCliente);
+        clienteRepository.findById(idCliente)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + idCliente));
 
         List<PedidoEntity> pedidosPendientes = pedidoRepository.findByClienteIdAndEstadoPedidoNombre(idCliente, ESTADO_PEDIDO_PENDIENTE);
 
@@ -147,7 +143,9 @@ public class PedidoServiceImp implements PedidoService {
     @Override
     public List<PedidoResponseDTO> obtenerPedidosPorCliente(Long idCliente) {
 
-        obtenerClientePorIdOExcepcion(idCliente);
+        clienteRepository.findById(idCliente)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(CLIENTE_NO_ENCONTRADO_POR_ID + idCliente));
 
         List<PedidoEntity> pedidos = pedidoRepository.findByClienteId(idCliente);
 
@@ -159,9 +157,13 @@ public class PedidoServiceImp implements PedidoService {
     @Override
     public PedidoResponseDTO actualizarEstadoPedido(Long idPedido, Long idEstado) {
 
-        PedidoEntity pedido = obtenerPedidoPorIdOExcepcion(idPedido);
+        PedidoEntity pedido = pedidoRepository.findById(idPedido)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(PEDIDO_NO_ENCONTRADO_POR_ID + idPedido));
 
-        EstadoPedidoEntity estado = obtenerEstadoPedidoPorIdOExcepcion(idEstado);
+        EstadoPedidoEntity estado = estadoPedidoRepository.findById(idEstado)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(ESTADO_PEDIDO_NO_ENCONTRADO_POR_ID + idEstado));
 
         pedido.setEstadoPedido(estado);
         pedidoRepository.save(pedido);

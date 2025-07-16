@@ -42,10 +42,6 @@ public class ClienteEntity {
             message = "El teléfono debe tener un formato válido")
     private String telefono;
 
-    @NotBlank
-    @Size(max = 80)
-    private String direccion;
-
     @OneToMany(mappedBy = "cliente")
     private List<PedidoEntity> pedidos;
 }

@@ -47,8 +47,7 @@ public class ClienteServiceImpTest {
                 "Pedrito",
                 "Jepeto",
                 CLIENTE_DNI,
-                "23232322",
-                "Calle falsa 11"
+                "23232322"
         );
 
         clienteEntity = ClienteEntity.builder()
@@ -57,15 +56,13 @@ public class ClienteServiceImpTest {
                 .apellido(requestDTO.apellido())
                 .dni(requestDTO.dni())
                 .telefono(requestDTO.telefono())
-                .direccion(requestDTO.direccion())
                 .build();
 
         responseDTO = new ClienteResponseDTO(
                 clienteEntity.getNombre(),
                 clienteEntity.getApellido(),
                 clienteEntity.getDni(),
-                clienteEntity.getTelefono(),
-                clienteEntity.getDireccion()
+                clienteEntity.getTelefono()
         );
     }
 

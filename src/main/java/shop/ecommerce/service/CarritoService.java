@@ -1,6 +1,7 @@
 package shop.ecommerce.service;
 
 import shop.ecommerce.dto.request.CarritoRequestDTO;
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.response.CarritoResponseDTO;
 import shop.ecommerce.dto.response.FinalizarCarritoResponseDTO;
 
@@ -14,5 +15,5 @@ public interface CarritoService {
 
     void vaciarCarrito(Long carritoId);
 
-    FinalizarCarritoResponseDTO finalizarCarrito(Long carritoId);
+    FinalizarCarritoResponseDTO finalizarCarrito(Long carritoId, DireccionRequestDTO direccionDto);
 }

@@ -6,8 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.request.PedidoRequestDTO;
 import shop.ecommerce.dto.response.ClienteResponseDTO;
+import shop.ecommerce.dto.response.DireccionResponseDTO;
 import shop.ecommerce.dto.response.PedidoResponseDTO;
 import shop.ecommerce.exception.ResourceNotFoundException;
 import shop.ecommerce.mapper.PedidoMapper;
@@ -26,10 +28,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 import static shop.ecommerce.constants.EstadoPedidoConstants.ESTADO_PEDIDO_PENDIENTE;
+import static shop.ecommerce.constants.PedidoConstants.COSTO_ENVIO;
 import static shop.ecommerce.constants.TestConstants.*;
 
 
@@ -60,10 +62,29 @@ public class PedidoServiceImpTest {
 
     @BeforeEach
     void setUp() {
+
+        DireccionRequestDTO direccionRequestDTO = new DireccionRequestDTO(
+                5700,
+                "Calle 123",
+                27,
+                null,
+                "Casa con rejas"
+        );
+
+        DireccionResponseDTO direccionResponseDTO = new DireccionResponseDTO(
+                direccionRequestDTO.codigo_postal(),
+                direccionRequestDTO.calle(),
+                direccionRequestDTO.numero(),
+                direccionRequestDTO.piso(),
+                direccionRequestDTO.referencia()
+        );
+
         requestDTO = new PedidoRequestDTO(
                 LocalDateTime.now(),
+                COSTO_ENVIO,
                 new BigDecimal(2000),
                 CLIENTE_ID,
+                direccionRequestDTO,
                 ESTADO_PEDIDO_ID,
                 CARRITO_ID
         );
@@ -74,7 +95,6 @@ public class PedidoServiceImpTest {
                 .apellido("Sanchez")
                 .dni("1222323")
                 .telefono("4423233")
-                .direccion("av falsa")
                 .build();
 
         carritoEntity = CarritoEntity.builder()
@@ -101,6 +121,7 @@ public class PedidoServiceImpTest {
         pedidoEntity = PedidoEntity.builder()
                 .id(PEDIDO_ID)
                 .fecha(requestDTO.fecha())
+                .costoEnvio(requestDTO.costoEnvio())
                 .total(requestDTO.total())
                 .cliente(clienteEntity)
                 .estadoPedido(estadoPedidoEntity)
@@ -111,14 +132,15 @@ public class PedidoServiceImpTest {
                 clienteEntity.getNombre(),
                 clienteEntity.getApellido(),
                 clienteEntity.getDni(),
-                clienteEntity.getTelefono(),
-                clienteEntity.getDireccion()
+                clienteEntity.getTelefono()
         );
 
         responseDTO = new PedidoResponseDTO(
                 requestDTO.fecha(),
+                requestDTO.costoEnvio(),
                 requestDTO.total(),
                 clienteDTO,
+                direccionResponseDTO,
                 estadoPedidoEntity.getNombre());
     }
 

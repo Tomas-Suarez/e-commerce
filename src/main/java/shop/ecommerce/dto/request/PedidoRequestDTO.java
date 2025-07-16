@@ -10,10 +10,16 @@ public record PedidoRequestDTO(
         LocalDateTime fecha,
 
         @NotNull
+        BigDecimal costoEnvio,
+
+        @NotNull
         BigDecimal total,
 
         @NotNull
         Long idCliente,
+
+        @NotNull
+        DireccionRequestDTO direccion,
 
         @NotNull
         Long idEstadoPedido,

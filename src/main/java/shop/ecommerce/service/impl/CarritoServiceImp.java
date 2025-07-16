@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import shop.ecommerce.dto.request.CarritoRequestDTO;
+import shop.ecommerce.dto.request.DireccionRequestDTO;
 import shop.ecommerce.dto.response.CarritoResponseDTO;
 import shop.ecommerce.dto.response.FinalizarCarritoResponseDTO;
 import shop.ecommerce.dto.response.PedidoResponseDTO;
@@ -82,7 +83,7 @@ public class CarritoServiceImp implements CarritoService {
 
     @Override
     @Transactional
-    public FinalizarCarritoResponseDTO finalizarCarrito(Long carritoId) {
+    public FinalizarCarritoResponseDTO finalizarCarrito(Long carritoId, DireccionRequestDTO direccionDto) {
 
         CarritoEntity carritoEntity = carritoRepository.findById(carritoId)
                 .orElseThrow(() ->
@@ -96,7 +97,7 @@ public class CarritoServiceImp implements CarritoService {
         carritoRepository.save(carritoEntity);
 
         Long clienteId = carritoEntity.getCliente().getId();
-        PedidoResponseDTO pedido = pedidoService.crearPedidoDesdeCarrito(clienteId);
+        PedidoResponseDTO pedido = pedidoService.crearPedidoDesdeCarrito(clienteId, direccionDto);
 
         vaciarCarrito(carritoId);
 

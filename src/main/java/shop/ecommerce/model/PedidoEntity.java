@@ -28,6 +28,9 @@ public class PedidoEntity {
     private LocalDateTime fecha;
 
     @NotNull
+    private BigDecimal costoEnvio;
+
+    @NotNull
     private BigDecimal total;
 
     @ManyToOne
@@ -42,7 +45,22 @@ public class PedidoEntity {
     @JoinColumn(name = "id_carrito", nullable = true)
     private CarritoEntity carrito;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_direccion", nullable = false)
+    private DireccionEntity direccion;
+
+    @Builder.Default
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedidoEntity> detalles = new ArrayList<>();
+
+    public BigDecimal calcularTotal(){
+        if(detalles == null || detalles.isEmpty()){
+            return BigDecimal.ZERO;
+        }
+
+        return detalles.stream()
+                .map(DetallePedidoEntity::calcularSubTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
 }
